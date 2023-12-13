@@ -70,7 +70,7 @@ type Factory struct {
 
 func (_this *Factory) AccessToGoogleAPI() *Factory {
    
-   // Store the ket securely!!! My code is just an example to show how it's working briefly.
+   // Store the key securely!!! My code is just an example to show how it's working briefly.
    GoogleAPIKey = "/my/secret/google-api/jsonkey.json"
    ctx := context.Background()
    jsonKey, err := ioutil.ReadFile(GoogleAPIKey)
@@ -107,35 +107,35 @@ func (_this *Factory) AccessToGoogleAPI() *Factory {
 
 <br>
 
-### Verify the receipt and join member
+### Verify the receipt
 ```go
 func (_this *HttpService) verifyGoogleReceipt(reqBody formats.ReqGoogleRequest) error {
 	
 	err := AckSub(_this.Fac, reqBody.PurchaseToken)
-       if err != nil {
-         // handle the error
+    if err != nil {
+      // handle the error
 	}
 
 	sub, err := GetSub(_this.Fac, reqBody.PurchaseToken)
 	if err != nil {
-         // handle the error  
+      // handle the error
 	}
 
 	if sub.AcknowledgementState != 1 {
-         // handle the error
+      // handle the error
 	}
 
 	if sub.PaymentState == nil {
-         // handle the error
+      // handle the error
 	}
 
 	switch *sub.PaymentState {
 	case 0:
-         // handle the error
+      // handle the error
 	case 1:
-		fmt.Printf("Payment is received.")
+      fmt.Printf("Payment is received.")
 	default:
-         // handle the error
+      // handle the error
 	}
 	
 	/** Save the receipt **/
@@ -156,7 +156,7 @@ func GetSub(Fac *factory.Factory, token string) (androidpublisher.SubscriptionPu
 		// handle the error
 	}
 
-   // parse the response
+    // parse the response
 
 	return sub, nil
 }
