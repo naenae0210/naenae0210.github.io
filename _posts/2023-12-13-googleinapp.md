@@ -53,21 +53,22 @@ sequenceDiagram
         DB->>Server: return
         Server->>App: return 
 ```
-[Purchase](https://developer.android.com/reference/com/android/billingclient/api/Purchase)
-
+[Purchase](https://developer.android.com/reference/com/android/billingclient/api/Purchase) |
 [SubscriptionPurchase](https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptions)
+
+<br>
 
 ### Access to Google Play API
 ```go
 
-type Service struct {
+type Factory struct {
    ...
      GoogleAPI       *androidpublisher.Service
      PackageName     string
      SubscriptionID  string
 }
 
-func (_this Service) AccessToGoogleAPI() {
+func (_this *Factory) AccessToGoogleAPI() *Factory {
    
    // Store the ket securely!!! My code is just an example to show how it's working briefly.
    GoogleAPIKey = "/my/secret/google-api/jsonkey.json"
@@ -104,89 +105,64 @@ func (_this Service) AccessToGoogleAPI() {
 [google package](https://pkg.go.dev/golang.org/x/oauth2/google#JWTConfigFromJSON) |
 [androidpublisher package](https://pkg.go.dev/google.golang.org/api/androidpublisher/v2#Service) 
 
+<br>
 
 ### Verify the receipt and join member
 ```go
-func (_this *HttpService) verifyGoogleReceipt(PNumber string, reqBody formats.ReqGoogleRequest) error {
+func (_this *HttpService) verifyGoogleReceipt(reqBody formats.ReqGoogleRequest) error {
 	
-	/** 영수증 검증 **/
+	err := AckSub(_this.Fac, reqBody.PurchaseToken)
+       if err != nil {
+         // handle the error
+	}
 
-	err := util.AcknowledgeSubscription(_this.Fac, reqBody.PurchaseToken)
+	sub, err := GetSub(_this.Fac, reqBody.PurchaseToken)
 	if err != nil {
-		_this.Fac.Print("Payment is not acknowledged.")
-		return err
+         // handle the error  
 	}
 
-	respSub, err := util.GetSubscription(_this.Fac, reqBody.PurchaseToken)
-	if err != nil {
-		_this.Fac.Print("failed to get subscription.")
+	if sub.AcknowledgementState != 1 {
+         // handle the error
 	}
 
-	if respSub.AcknowledgementState != 1 {
-		_this.Fac.Print("Payment is not acknowledged.")
-		return err
+	if sub.PaymentState == nil {
+         // handle the error
 	}
 
-	if respSub.PaymentState == nil {
-		_this.Fac.Print("payment state is nil")
-		return err
-	}
-
-	switch *respSub.PaymentState {
+	switch *sub.PaymentState {
 	case 0:
-		_this.Fac.Print("payment is pending")
-		return err
+         // handle the error
 	case 1:
-		_this.Fac.Print("Payment is received.")
+		fmt.Printf("Payment is received.")
 	default:
-		_this.Fac.Print("unknown payment state")
-		return err
+         // handle the error
 	}
 	
-	/** 영수증 저장 **/
+	/** Save the receipt **/
 	...
 
 }
 ```
 
 ```go
-func AcknowledgeSubscription(Fac *factory.Factory, token string) error {
 
-	call := Fac.GoogleAPI.Purchases.Subscriptions.Acknowledge(Fac.Propertys().PackageName, Fac.Propertys().SubscriptionID, token, &androidpublisher.SubscriptionPurchasesAcknowledgeRequest{})
+func GetSub(Fac *factory.Factory, token string) (androidpublisher.SubscriptionPurchase, error) {
 
-	err := call.Do()
+	sub := androidpublisher.SubscriptionPurchase{}
+
+	call := Fac.GoogleAPI.Purchases.Subscriptions.Get(Fac.PackageName, Fac.SubscriptionID, token)
+	response, err := call.Do()
 	if err != nil {
-		return err
+		// handle the error
 	}
 
-	return nil
-}
+   // parse the response
 
-func GetSubscription(Fac *factory.Factory, token string) (androidpublisher.SubscriptionPurchase, error) {
-
-	respSub := androidpublisher.SubscriptionPurchase{}
-
-	call := Fac.GoogleAPI.Purchases.Subscriptions.Get(Fac.Propertys().PackageName, Fac.Propertys().SubscriptionID, token)
-	resp, err := call.Do()
-	if err != nil {
-		return respSub, err
-	}
-
-	jsonByte, err := json.Marshal(resp)
-	if err != nil {
-		return respSub, err
-	}
-
-	err = json.Unmarshal(jsonByte, &respSub)
-	if err != nil {
-		return respSub, err
-	}
-
-	Fac.Print(token, respSub)
-
-	return respSub, nil
+	return sub, nil
 }
 ```
+
+<br>
 
 ### RTDN 
 ```go
@@ -235,13 +211,6 @@ func (_this *Handler) HandleNotification(notif playstore.SubscriptionNotificatio
 
 	token := notif.PurchaseToken
 	notiType := notif.NotificationType
-
-	respSub, err := util.GetSubscription(_this.Fac, token)
-		if err != nil {
-			fmt.Println(respSub)
-			fmt.Println("Failed to get respSub")
-			return
-		}
 
 	switch notiType {
 	case playstore.SubscriptionNotificationTypeRenewed:	
