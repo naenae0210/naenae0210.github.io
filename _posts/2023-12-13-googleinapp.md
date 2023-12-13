@@ -112,30 +112,30 @@ func (_this *Factory) AccessToGoogleAPI() *Factory {
 func (_this *HttpService) verifyGoogleReceipt(reqBody formats.ReqGoogleRequest) error {
 	
 	err := AckSub(_this.Fac, reqBody.PurchaseToken)
-    if err != nil {
-      // handle the error
+	if err != nil {
+	  // handle the error
 	}
 
 	sub, err := GetSub(_this.Fac, reqBody.PurchaseToken)
 	if err != nil {
-      // handle the error
+	  // handle the error
 	}
 
 	if sub.AcknowledgementState != 1 {
-      // handle the error
+	  // handle the error
 	}
 
 	if sub.PaymentState == nil {
-      // handle the error
+	  // handle the error
 	}
 
 	switch *sub.PaymentState {
 	case 0:
-      // handle the error
+	  // handle the error
 	case 1:
-      fmt.Printf("Payment is received.")
+	  fmt.Printf("Payment is received.")
 	default:
-      // handle the error
+	  // handle the error
 	}
 	
 	/** Save the receipt **/
@@ -153,10 +153,10 @@ func GetSub(Fac *factory.Factory, token string) (androidpublisher.SubscriptionPu
 	call := Fac.GoogleAPI.Purchases.Subscriptions.Get(Fac.PackageName, Fac.SubscriptionID, token)
 	response, err := call.Do()
 	if err != nil {
-		// handle the error
+	  // handle the error
 	}
-
-    // parse the response
+	
+	// parse the response
 
 	return sub, nil
 }
@@ -177,8 +177,8 @@ func ReceiveRTDN(fac *factory.Factory, handler *Handler) {
 
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		fmt.Printf("Failed to create client: %v\n", err)
-		return
+	  fmt.Printf("Failed to create client: %v\n", err)
+	  return
 	}
 
 	sub := client.Subscription(subscriptionID)
