@@ -53,6 +53,8 @@ sequenceDiagram
         DB->>Server: return
         Server->>App: return 
 ```
+![](/assets/img/googleinappSequence.png)
+
 [Purchase](https://developer.android.com/reference/com/android/billingclient/api/Purchase) |
 [SubscriptionPurchase](https://developers.google.com/android-publisher/api-ref/rest/v3/purchases.subscriptions)
 
