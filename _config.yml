@@ -2,6 +2,7 @@
 
 include:
  - _javascript
+ - assets/img/logo.ico/
 
 # Import the theme
 theme: jekyll-theme-chirpy
@@ -117,9 +118,6 @@ pwa:
   enabled: true # the option for PWA feature
 
 paginate: 10
-
-# The base URL of your site
-baseurl: ""
 
 # ------------ The following options are not recommended to be modified ------------------
 
